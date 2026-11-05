@@ -5,6 +5,10 @@
 
 #include "main_cfg.h"
 
+/* ID for unused event */
+#define EVENT_ID_NOT_USED 0xFF
+
+/* API */
 void FromIsr_Set_Event(uint8_t event_id);
 void FromUser_Set_Event(uint8_t event_id);
 

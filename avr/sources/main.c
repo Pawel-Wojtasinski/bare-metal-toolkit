@@ -53,12 +53,24 @@ int main(void)
    /* Drivers initialization */
    Main_DrvInit();
 
+   /* Abstractions initialization */
+   Main_AbstractionsInit();
+
    /* Apps initialization */
    Main_AppInit();
 
    /* Starts system */
    Main_Events = 0;
    sei();
+
+   /* Starts drivers */
+   Main_DrvStart();
+
+   /* Starts abstractions */
+   Main_AbstractionsStart();
+
+   /* Starts Apps */
+   Main_AppStart();
 
    /* Starts System Tick (Timer 0) */
    Timer0_Start();
@@ -140,15 +152,18 @@ static void Main_Timer(void)
 \****************************************************************************/
 void FromIsr_Set_Event(uint8_t event_id)
 {
-   if((SREG & (1<< SREG_I)) == 0)
+   if((SREG & (1 << SREG_I)) == 0)
    {
-      if(event_id < 32)
+      if(event_id != EVENT_ID_NOT_USED)
       {
-         Main_Events |= 1UL << event_id;
-      }
-      else
-      {
-         Error_Report("FromIsr_Set_Event" ,Error_EventIdOutOfRange);
+         if(event_id < 32)
+         {
+            Main_Events |= 1UL << event_id;
+         }
+         else
+         {
+            Error_Report("FromIsr_Set_Event" ,Error_EventIdOutOfRange);
+         }
       }
    }
    else
@@ -167,15 +182,20 @@ void FromIsr_Set_Event(uint8_t event_id)
 \****************************************************************************/
 void FromUser_Set_Event(uint8_t event_id)
 {
-   if((SREG & (1<< SREG_I)) != 0)
+   if((SREG & (1 << SREG_I)) != 0)
    {
-      if(event_id < 32)
+      if(event_id != EVENT_ID_NOT_USED)
       {
-         Main_Events |= 1UL << event_id;
-      }
-      else
-      {
-         Error_Report("FromUser_Set_Event" ,Error_EventIdOutOfRange);
+         if(event_id < 32)
+         {
+            cli();
+            Main_Events |= 1UL << event_id;
+            sei();
+         }
+         else
+         {
+            Error_Report("FromUser_Set_Event" ,Error_EventIdOutOfRange);
+         }
       }
    }
    else
